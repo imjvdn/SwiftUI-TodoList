@@ -207,17 +207,22 @@ struct NotificationBanner: View {
             .background(
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color(UIColor.secondarySystemBackground))
-                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+                    .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 3)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(color, lineWidth: 2)
+                    )
             )
             .padding(.horizontal)
             
             Spacer()
         }
         .padding(.top, 8)
-        .transition(.move(edge: .top).combined(with: .opacity))
+        // Simpler transition for playground
+        .transition(.opacity)
         .onAppear {
-            // Auto-dismiss after 2 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            // Longer auto-dismiss for playground testing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                 withAnimation(.easeOut) {
                     isShowing = false
                 }
@@ -262,7 +267,7 @@ struct TodoListView: View {
         NavigationView {
             // Apply the selected theme
             ZStack {
-                // Notification banner
+                // Notification banner - positioned more prominently for playground visibility
                 if showNotification {
                     NotificationBanner(
                         message: notificationMessage,
@@ -270,7 +275,9 @@ struct TodoListView: View {
                         color: notificationColor,
                         isShowing: $showNotification
                     )
-                    .zIndex(1) // Ensure it appears above other content
+                    .zIndex(100) // Higher z-index to ensure visibility
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 20) // More padding to make it more visible
                 }
                 // Background color based on theme
                 Group {
@@ -342,13 +349,20 @@ struct TodoListView: View {
                                 .foregroundColor(item.isCompleted ? .green : .gray)
                                 .onTapGesture {
                                     let title = todoStore.toggleCompletion(for: item)
-                                    if !item.isCompleted { // Show notification only when marking as completed
+                                    // Show notification when toggling completion state
+                                    if !item.isCompleted { // Item is being marked as completed
                                         notificationMessage = "\"\(title)\" completed!"
                                         notificationIcon = "checkmark.circle.fill"
                                         notificationColor = .green
-                                        withAnimation(.spring()) {
-                                            showNotification = true
-                                        }
+                                    } else { // Item is being marked as incomplete
+                                        notificationMessage = "\"\(title)\" marked incomplete"
+                                        notificationIcon = "circle"
+                                        notificationColor = .orange
+                                    }
+                                    
+                                    // Always show notification for better testing in playground
+                                    withAnimation(.easeInOut(duration: 0.5)) {
+                                        showNotification = true
                                     }
                                 }
                             
