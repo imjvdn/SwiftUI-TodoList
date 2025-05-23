@@ -11,11 +11,31 @@
 
 <p align="center">A modern, declarative task management application showcasing SwiftUI's powerful architecture and Apple's Human Interface Guidelines.</p>
 
+<p align="center"><strong>This repository contains TWO implementations:</strong></p>
+<p align="center">1. A SwiftUI Playground prototype in the root directory</p>
+<p align="center">2. A full Xcode project with CoreData in the <code>TodoList/</code> directory</p>
+
 </div>
 
 ## 🌟 Overview
 
 This Todo List application demonstrates Apple's recommended patterns and practices for building performant, maintainable iOS applications using SwiftUI. The project serves as both a practical utility and a technical showcase of modern iOS development principles.
+
+### Project Structure
+
+This repository contains two complete implementations of the same Todo List app:
+
+1. **SwiftUI Playground Prototype** (in root directory)
+   - Located in `MyPlayground.playground`
+   - Uses UserDefaults for data persistence
+   - Perfect for learning and experimentation
+   - Includes a test runner in `TestRunner.playground`
+
+2. **Full Xcode Project** (in `TodoList/` directory)
+   - Complete iOS app with proper project structure
+   - Uses CoreData for robust data persistence
+   - Includes unit tests and UI tests
+   - Ready for further development and App Store submission
 
 ## ✨ Key Features
 
@@ -46,6 +66,8 @@ This Todo List application demonstrates Apple's recommended patterns and practic
 
 This application follows Apple's recommended architectural patterns:
 
+### Playground Version
+
 ```swift
 // MVVM Pattern with SwiftUI
 enum ColorTheme: String, Codable { /* Theme Model */ }
@@ -74,6 +96,43 @@ struct TodoListView: View {
 
 // State Management
 @StateObject private var todoStore = TodoStore()
+```
+
+### Xcode Project Version
+
+The full Xcode project enhances the architecture with CoreData integration:
+
+```swift
+// MVVM Pattern with CoreData
+enum ColorTheme: String, Codable { 
+    /* Theme Model with CoreData compatibility */
+    func fromRawIndex(_ index: Int16) -> ColorTheme
+}
+
+enum Priority: String, Codable, CaseIterable { 
+    /* Enum Model with CoreData compatibility */
+    var rawIndex: Int16 { /* For CoreData storage */ }
+}
+
+// CoreData Entity
+extension Item { // NSManagedObject
+    /* CoreData entity with computed properties */
+    var isOverdue: Bool { /* Logic to determine if task is past due date */ }
+    var priorityEnum: Priority { /* Convert from CoreData storage */ }
+    
+    static func createItem(title: String, priority: Priority, dueDate: Date?, in context: NSManagedObjectContext) -> Item
+}
+
+class SettingsManager: ObservableObject { 
+    /* App settings with persistence */
+    @Published var colorTheme: ColorTheme
+}
+
+struct TodoListView: View { 
+    /* View with CoreData and environment integration */
+    @Environment(\.managedObjectContext) private var viewContext
+    @FetchRequest private var items: FetchedResults<Item>
+}
 ```
 
 ### Technical Implementation
@@ -127,13 +186,34 @@ This project includes comprehensive tests to ensure code quality and reliability
 - **Overdue Tests**: Verify overdue status calculation logic
 - **Persistence Tests**: Test Codable implementation for data storage
 
-To run the tests:
+### Playground Tests
+
+To run the playground tests:
 
 1. Open the `TestRunner.playground` file in Xcode
 2. Run the playground to execute all tests
 3. View the results in the live view or console output
 
+### Standalone Tests
+
+A standalone test file is also available that can be run from the command line:
+
+```bash
+# Run the standalone tests
+swift RunTests.swift
+```
+
+### Xcode Project Tests
+
+The Xcode project includes both unit tests and UI tests:
+
+1. Open the `TodoList.xcodeproj` file in Xcode
+2. Use ⌘+U to run all tests
+3. Navigate to the Test Navigator (⌘+6) to run individual tests
+
 ## 🚀 Getting Started
+
+### Playground Version
 
 ```bash
 # Clone the repository
@@ -146,18 +226,44 @@ cd SwiftUI-TodoList
 open MyPlayground.playground
 ```
 
+### Full Xcode Project
+
+The project has been migrated to a full Xcode project with CoreData integration:
+
+```bash
+# Navigate to the Xcode project directory
+cd SwiftUI-TodoList/TodoList
+
+# Open in Xcode
+open TodoList.xcodeproj
+```
+
+#### CoreData Setup
+
+Before running the Xcode project, you need to set up the CoreData model:
+
+1. Open the `TodoList.xcdatamodeld` file in Xcode
+2. Select the "Item" entity and add these attributes:
+   - `id`: UUID (Optional)
+   - `title`: String
+   - `isCompleted`: Boolean (Use scalar type)
+   - `priority`: Integer 16 (Use scalar type)
+   - `dueDate`: Date (Optional)
+   - Keep the existing `timestamp` attribute
+3. Save and build the project
+
 ## 🔮 Future Roadmap
 
-| Feature | Description | Priority |
-|---------|-------------|----------|
-| **Categories/Tags** | Group tasks by custom categories | High |
-| **Calendar Integration** | Export tasks to system calendar | Medium |
-| **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
-| **Enhanced Animations** | Additional micro-interactions and transitions | Low |
-| **Widgets** | Home screen quick-access widgets | Low |
-| **Shortcuts** | Siri and Shortcuts integration | Low |
-| **CloudKit** | Cross-device synchronization | Low |
-| **UI Tests** | Add XCTest UI tests for interface testing | Low |
+| Feature | Description | Priority | Status |
+|---------|-------------|----------|--------|
+| **Categories/Tags** | Group tasks by custom categories | High | Planned |
+| **Calendar Integration** | Export tasks to system calendar | Medium | Planned |
+| **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium | ✅ Completed |
+| **Enhanced Animations** | Additional micro-interactions and transitions | Low | Planned |
+| **Widgets** | Home screen quick-access widgets | Low | Planned |
+| **Shortcuts** | Siri and Shortcuts integration | Low | Planned |
+| **CloudKit** | Cross-device synchronization | Low | Planned |
+| **UI Tests** | Add XCTest UI tests for interface testing | Low | ✅ Completed |
 
 ## 🛠 Technical Requirements
 
