@@ -116,6 +116,23 @@ struct TodoListView: View {
   - UI automatically reflects state changes
   - No manual view refreshing required
 
+## 🪢 Testing
+
+This project includes comprehensive tests to ensure code quality and reliability:
+
+- **Model Tests**: Verify the `TodoItem` model properties and behavior
+- **Store Tests**: Validate the `TodoStore` CRUD operations
+- **Theme Tests**: Confirm proper theme switching functionality
+- **Priority Tests**: Ensure priority enum values and properties work correctly
+- **Overdue Tests**: Verify overdue status calculation logic
+- **Persistence Tests**: Test Codable implementation for data storage
+
+To run the tests:
+
+1. Open the `TestRunner.playground` file in Xcode
+2. Run the playground to execute all tests
+3. View the results in the live view or console output
+
 ## 🚀 Getting Started
 
 ```bash
@@ -140,6 +157,7 @@ open MyPlayground.playground
 | **Widgets** | Home screen quick-access widgets | Low |
 | **Shortcuts** | Siri and Shortcuts integration | Low |
 | **CloudKit** | Cross-device synchronization | Low |
+| **UI Tests** | Add XCTest UI tests for interface testing | Low |
 
 ## 🛠 Technical Requirements
 
