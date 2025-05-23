@@ -128,5 +128,5 @@ This project is available under the MIT license. See the [LICENSE](LICENSE) file
 
 <div align="center">
 <p>Built with ❤️ using SwiftUI</p>
-<p>© 2025 Jordan Morrow</p>
+<p>© 2025 Jadan Morrow</p>
 </div>
