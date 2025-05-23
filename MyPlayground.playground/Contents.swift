@@ -1,6 +1,20 @@
-//: A SwiftUI based To-Do List App with Data Persistence, Priority Levels, and Due Dates
+//: A SwiftUI based To-Do List App with Data Persistence, Priority Levels, Due Dates, and Dark Mode Support
 import SwiftUI
 import PlaygroundSupport
+
+// Theme enum for light/dark mode
+enum ColorTheme: String, Codable {
+    case light, dark, system
+    
+    // Get the current effective theme based on system settings
+    func effectiveColorScheme(systemScheme: ColorScheme?) -> ColorScheme {
+        switch self {
+        case .light: return .light
+        case .dark: return .dark
+        case .system: return systemScheme ?? .light
+        }
+    }
+}
 
 // Priority enum for tasks
 enum Priority: String, Codable, CaseIterable {
@@ -8,6 +22,7 @@ enum Priority: String, Codable, CaseIterable {
     case medium = "Medium"
     case low = "Low"
     
+    // Colors that work in both light and dark mode
     var color: Color {
         switch self {
         case .high: return .red
@@ -50,7 +65,7 @@ struct TodoItem: Identifiable, Codable {
     }
 }
 
-// TodoStore to handle data persistence
+// TodoStore to handle data persistence and app settings
 class TodoStore: ObservableObject {
     // Published property that triggers UI updates when changed
     @Published var todoItems: [TodoItem] = [] {
@@ -59,11 +74,20 @@ class TodoStore: ObservableObject {
         }
     }
     
-    // Key for UserDefaults storage
+    // Theme setting with default to system
+    @Published var colorTheme: ColorTheme = .system {
+        didSet {
+            saveSettings()
+        }
+    }
+    
+    // Keys for UserDefaults storage
     private let todosKey = "TodoItems"
+    private let settingsKey = "AppSettings"
     
     init() {
         loadTodos()
+        loadSettings()
     }
     
     // Load todos from UserDefaults
@@ -79,11 +103,39 @@ class TodoStore: ObservableObject {
         todoItems = []
     }
     
+    // Load app settings from UserDefaults
+    private func loadSettings() {
+        if let data = UserDefaults.standard.data(forKey: settingsKey) {
+            if let settings = try? JSONDecoder().decode([String: String].self, from: data),
+               let themeString = settings["colorTheme"],
+               let theme = ColorTheme(rawValue: themeString) {
+                colorTheme = theme
+                return
+            }
+        }
+        
+        // Default to system theme if no saved settings
+        colorTheme = .system
+    }
+    
     // Save todos to UserDefaults
     private func saveTodos() {
         if let encodedData = try? JSONEncoder().encode(todoItems) {
             UserDefaults.standard.set(encodedData, forKey: todosKey)
         }
+    }
+    
+    // Save app settings to UserDefaults
+    private func saveSettings() {
+        let settings = ["colorTheme": colorTheme.rawValue]
+        if let encodedData = try? JSONEncoder().encode(settings) {
+            UserDefaults.standard.set(encodedData, forKey: settingsKey)
+        }
+    }
+    
+    // Update the color theme
+    func updateColorTheme(to theme: ColorTheme) {
+        colorTheme = theme
     }
     
     // Add a new todo item
@@ -124,6 +176,9 @@ struct TodoListView: View {
     // StateObject for the TodoStore to persist across view updates
     @StateObject private var todoStore = TodoStore()
     
+    // Environment value to detect system dark/light mode
+    @Environment(\.colorScheme) private var colorScheme
+    
     // State for the new item text field
     @State private var newItemTitle: String = ""
     
@@ -144,7 +199,19 @@ struct TodoListView: View {
     
     var body: some View {
         NavigationView {
-            VStack {
+            // Apply the selected theme
+            ZStack {
+                // Background color based on theme
+                Group {
+                    if todoStore.colorTheme.effectiveColorScheme(systemScheme: colorScheme) == .dark {
+                        Color(UIColor.systemBackground)
+                            .ignoresSafeArea()
+                    } else {
+                        Color(UIColor.systemBackground)
+                            .ignoresSafeArea()
+                    }
+                }
+            VStack(spacing: 0) {
                 // Input area for adding new items
                 VStack(spacing: 10) {
                     HStack {
@@ -311,9 +378,34 @@ struct TodoListView: View {
             }
             .navigationTitle("To-Do List")
             .toolbar {
-                EditButton()
+                ToolbarItem(placement: .navigationBarLeading) {
+                    // Theme toggle menu
+                    Menu {
+                        Button(action: { todoStore.updateColorTheme(to: .light) }) {
+                            Label("Light Mode", systemImage: "sun.max.fill")
+                                .foregroundColor(.yellow)
+                        }
+                        
+                        Button(action: { todoStore.updateColorTheme(to: .dark) }) {
+                            Label("Dark Mode", systemImage: "moon.fill")
+                                .foregroundColor(.indigo)
+                        }
+                        
+                        Button(action: { todoStore.updateColorTheme(to: .system) }) {
+                            Label("System Default", systemImage: "gear")
+                        }
+                    } label: {
+                        Image(systemName: todoStore.colorTheme.effectiveColorScheme(systemScheme: colorScheme) == .dark ? "moon.fill" : "sun.max.fill")
+                    }
+                }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
             }
         }
+        // Apply the color scheme preference
+        .preferredColorScheme(todoStore.colorTheme.effectiveColorScheme(systemScheme: colorScheme))
     }
     
     // Function to add a new item

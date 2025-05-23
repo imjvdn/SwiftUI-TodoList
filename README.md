@@ -27,6 +27,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - **Data persistence** across app launches
   - **Priority levels** (High, Medium, Low) with visual indicators
   - **Due dates** with overdue status indicators
+  - **Dark mode support** with theme switching
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
@@ -37,6 +38,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Color-coded priority indicators
   - Date picker for setting deadlines
   - Visual overdue status alerts
+  - Light/dark/system theme options
 
 ## 🏛 Architecture
 
@@ -44,6 +46,8 @@ This application follows Apple's recommended architectural patterns:
 
 ```swift
 // MVVM Pattern with SwiftUI
+enum ColorTheme: String, Codable { /* Theme Model */ }
+
 enum Priority: String, Codable, CaseIterable { /* Enum Model */ }
 
 struct TodoItem: Identifiable, Codable {
@@ -51,9 +55,15 @@ struct TodoItem: Identifiable, Codable {
     var isOverdue: Bool { /* Logic to determine if task is past due date */ }
 }
 
-class TodoStore: ObservableObject { /* ViewModel */ }
+class TodoStore: ObservableObject { 
+    /* ViewModel with theme management */
+    @Published var colorTheme: ColorTheme
+}
 
-struct TodoListView: View { /* View */ }
+struct TodoListView: View { 
+    /* View with environment awareness */
+    @Environment(\.colorScheme) private var colorScheme
+}
 
 // State Management
 @StateObject private var todoStore = TodoStore()
@@ -114,9 +124,9 @@ open MyPlayground.playground
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
+| **Categories/Tags** | Group tasks by custom categories | High |
 | **Calendar Integration** | Export tasks to system calendar | Medium |
 | **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
-| **Categories/Tags** | Group tasks by custom categories | Medium |
 | **Animations** | Custom transitions and micro-interactions | Medium |
 | **Widgets** | Home screen quick-access widgets | Low |
 | **Shortcuts** | Siri and Shortcuts integration | Low |
