@@ -25,6 +25,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Swipe-to-delete with haptic feedback
   - Batch editing capabilities
   - **Data persistence** across app launches
+  - **Priority levels** (High, Medium, Low) with visual indicators
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
@@ -32,6 +33,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Semantic colors for accessibility
   - Animation-enhanced interactions
   - Task completion status indicator
+  - Color-coded priority indicators
 
 ## 🏛 Architecture
 
@@ -39,6 +41,8 @@ This application follows Apple's recommended architectural patterns:
 
 ```swift
 // MVVM Pattern with SwiftUI
+enum Priority: String, Codable, CaseIterable { /* Enum Model */ }
+
 struct TodoItem: Identifiable, Codable { /* Model */ }
 
 class TodoStore: ObservableObject { /* ViewModel */ }
@@ -103,9 +107,11 @@ open MyPlayground.playground
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
+| **Due Dates** | Calendar integration and date-based filtering | High |
 | **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
+| **Categories/Tags** | Group tasks by custom categories | Medium |
 | **Animations** | Custom transitions and micro-interactions | Medium |
-| **Widgets** | Home screen quick-access widgets | Medium |
+| **Widgets** | Home screen quick-access widgets | Low |
 | **Shortcuts** | Siri and Shortcuts integration | Low |
 | **CloudKit** | Cross-device synchronization | Low |
 
