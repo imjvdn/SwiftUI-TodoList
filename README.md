@@ -17,10 +17,6 @@
 
 This Todo List application demonstrates Apple's recommended patterns and practices for building performant, maintainable iOS applications using SwiftUI. The project serves as both a practical utility and a technical showcase of modern iOS development principles.
 
-<div align="center">
-<i>"Simple, but not simpler" — Inspired by Apple Design Philosophy</i>
-</div>
-
 ## ✨ Key Features
 
 - **Intuitive Task Management**
