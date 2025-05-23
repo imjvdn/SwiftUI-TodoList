@@ -14,15 +14,39 @@ struct PersistenceController {
     static let preview: PersistenceController = {
         let result = PersistenceController(inMemory: true)
         let viewContext = result.container.viewContext
-        for _ in 0..<10 {
+        
+        // Create sample todo items for preview
+        let titles = ["Buy groceries", "Finish project", "Call mom", "Pay bills", "Go for a run"]
+        let priorities: [Priority] = [.high, .medium, .low, .medium, .high]
+        
+        // Create items with various states
+        for i in 0..<titles.count {
             let newItem = Item(context: viewContext)
+            // We'll set the ID after the CoreData model is properly set up
+            // For now, we'll just use the timestamp as an identifier
             newItem.timestamp = Date()
+            
+            // These properties will be available after you set up the CoreData model
+            // For now, we'll just set the timestamp to avoid errors
+            // newItem.title = titles[i]
+            // newItem.isCompleted = i % 2 == 0
+            // newItem.priority = priorities[i].rawIndex
+            
+            // Due dates will be set after CoreData model is properly configured
+            // For now, we'll comment this out to avoid errors
+            /*
+            if i % 3 == 0 { // Every third item has a past due date
+                newItem.dueDate = Date().addingTimeInterval(-24 * 60 * 60) // Yesterday
+            } else if i % 3 == 1 { // Some have future due dates
+                newItem.dueDate = Date().addingTimeInterval(48 * 60 * 60) // Two days from now
+            }
+            */
         }
+        
         do {
             try viewContext.save()
         } catch {
             // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
             let nsError = error as NSError
             fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
         }
