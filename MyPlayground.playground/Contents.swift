@@ -158,16 +158,71 @@ class TodoStore: ObservableObject {
         }
     }
     
-    // Toggle completion status
-    func toggleCompletion(for todo: TodoItem) {
+    // Toggle completion status and return the updated item title for notification
+    func toggleCompletion(for todo: TodoItem) -> String {
         if let index = todoItems.firstIndex(where: { $0.id == todo.id }) {
             todoItems[index].isCompleted.toggle()
+            return todoItems[index].title
         }
+        return ""
     }
     
     // Delete todos at specified offsets
     func deleteTodos(at offsets: IndexSet) {
         todoItems.remove(atOffsets: offsets)
+    }
+}
+
+// Notification Banner View
+struct NotificationBanner: View {
+    let message: String
+    let icon: String
+    let color: Color
+    @Binding var isShowing: Bool
+    
+    var body: some View {
+        VStack {
+            HStack(spacing: 15) {
+                Image(systemName: icon)
+                    .foregroundColor(color)
+                    .imageScale(.large)
+                
+                Text(message)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                
+                Spacer()
+                
+                Button(action: {
+                    withAnimation(.easeOut) {
+                        isShowing = false
+                    }
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.gray)
+                        .imageScale(.medium)
+                }
+            }
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color(UIColor.secondarySystemBackground))
+                    .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+            )
+            .padding(.horizontal)
+            
+            Spacer()
+        }
+        .padding(.top, 8)
+        .transition(.move(edge: .top).combined(with: .opacity))
+        .onAppear {
+            // Auto-dismiss after 2 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                withAnimation(.easeOut) {
+                    isShowing = false
+                }
+            }
+        }
     }
 }
 
@@ -189,6 +244,12 @@ struct TodoListView: View {
     @State private var selectedDueDate: Date = Date().addingTimeInterval(24 * 60 * 60) // Default to tomorrow
     @State private var isDueDateEnabled: Bool = false
     
+    // State for notification banner
+    @State private var showNotification = false
+    @State private var notificationMessage = ""
+    @State private var notificationIcon = ""
+    @State private var notificationColor = Color.green
+    
     // Date formatter for displaying dates
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -201,6 +262,16 @@ struct TodoListView: View {
         NavigationView {
             // Apply the selected theme
             ZStack {
+                // Notification banner
+                if showNotification {
+                    NotificationBanner(
+                        message: notificationMessage,
+                        icon: notificationIcon,
+                        color: notificationColor,
+                        isShowing: $showNotification
+                    )
+                    .zIndex(1) // Ensure it appears above other content
+                }
                 // Background color based on theme
                 Group {
                     if todoStore.colorTheme.effectiveColorScheme(systemScheme: colorScheme) == .dark {
@@ -270,7 +341,15 @@ struct TodoListView: View {
                             Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
                                 .foregroundColor(item.isCompleted ? .green : .gray)
                                 .onTapGesture {
-                                    todoStore.toggleCompletion(for: item)
+                                    let title = todoStore.toggleCompletion(for: item)
+                                    if !item.isCompleted { // Show notification only when marking as completed
+                                        notificationMessage = "\"\(title)\" completed!"
+                                        notificationIcon = "checkmark.circle.fill"
+                                        notificationColor = .green
+                                        withAnimation(.spring()) {
+                                            showNotification = true
+                                        }
+                                    }
                                 }
                             
                             // Priority indicator

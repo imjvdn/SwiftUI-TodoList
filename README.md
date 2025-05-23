@@ -28,6 +28,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - **Priority levels** (High, Medium, Low) with visual indicators
   - **Due dates** with overdue status indicators
   - **Dark mode support** with theme switching
+  - **Notification banners** for task completion feedback
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
@@ -39,6 +40,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Date picker for setting deadlines
   - Visual overdue status alerts
   - Light/dark/system theme options
+  - Animated notification banners with auto-dismiss
 
 ## 🏛 Architecture
 
@@ -58,11 +60,16 @@ struct TodoItem: Identifiable, Codable {
 class TodoStore: ObservableObject { 
     /* ViewModel with theme management */
     @Published var colorTheme: ColorTheme
+    
+    func toggleCompletion(for todo: TodoItem) -> String { /* Returns title for notification */ }
 }
+
+struct NotificationBanner: View { /* Reusable notification component */ }
 
 struct TodoListView: View { 
     /* View with environment awareness */
     @Environment(\.colorScheme) private var colorScheme
+    @State private var showNotification = false
 }
 
 // State Management
@@ -79,6 +86,8 @@ struct TodoListView: View {
 | **Date Handling** | `DatePicker` and `DateFormatter` for due dates |
 | **UI Components** | Composition-based view hierarchy |
 | **User Interaction** | Declarative gesture handling |
+| **Animations** | Spring animations and transitions for notifications |
+| **Feedback System** | Custom notification banners with auto-dismiss |
 | **Rendering** | Optimized with identity-based diffing |
 
 ## 📱 SwiftUI Techniques Demonstrated
@@ -127,7 +136,7 @@ open MyPlayground.playground
 | **Categories/Tags** | Group tasks by custom categories | High |
 | **Calendar Integration** | Export tasks to system calendar | Medium |
 | **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
-| **Animations** | Custom transitions and micro-interactions | Medium |
+| **Enhanced Animations** | Additional micro-interactions and transitions | Low |
 | **Widgets** | Home screen quick-access widgets | Low |
 | **Shortcuts** | Siri and Shortcuts integration | Low |
 | **CloudKit** | Cross-device synchronization | Low |
