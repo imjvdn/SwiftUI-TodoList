@@ -1,4 +1,4 @@
-//: A SwiftUI based To-Do List App with Data Persistence and Priority Levels
+//: A SwiftUI based To-Do List App with Data Persistence, Priority Levels, and Due Dates
 import SwiftUI
 import PlaygroundSupport
 
@@ -31,6 +31,15 @@ struct TodoItem: Identifiable, Codable {
     var title: String
     var isCompleted: Bool = false
     var priority: Priority = .medium
+    var dueDate: Date?
+    
+    // Computed property to check if task is overdue
+    var isOverdue: Bool {
+        if let dueDate = dueDate, !isCompleted {
+            return dueDate < Date()
+        }
+        return false
+    }
 }
 
 // TodoStore to handle data persistence
@@ -70,8 +79,8 @@ class TodoStore: ObservableObject {
     }
     
     // Add a new todo item
-    func addTodo(title: String, priority: Priority = .medium) {
-        let newTodo = TodoItem(title: title, priority: priority)
+    func addTodo(title: String, priority: Priority = .medium, dueDate: Date? = nil) {
+        let newTodo = TodoItem(title: title, priority: priority, dueDate: dueDate)
         todoItems.append(newTodo)
     }
     
@@ -79,6 +88,13 @@ class TodoStore: ObservableObject {
     func updatePriority(for todo: TodoItem, to priority: Priority) {
         if let index = todoItems.firstIndex(where: { $0.id == todo.id }) {
             todoItems[index].priority = priority
+        }
+    }
+    
+    // Update due date for a todo item
+    func updateDueDate(for todo: TodoItem, to dueDate: Date?) {
+        if let index = todoItems.firstIndex(where: { $0.id == todo.id }) {
+            todoItems[index].dueDate = dueDate
         }
     }
     
@@ -105,6 +121,18 @@ struct TodoListView: View {
     
     // State for the selected priority
     @State private var selectedPriority: Priority = .medium
+    
+    // State for the due date picker
+    @State private var selectedDueDate: Date = Date().addingTimeInterval(24 * 60 * 60) // Default to tomorrow
+    @State private var isDueDateEnabled: Bool = false
+    
+    // Date formatter for displaying dates
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
+    }()
     
     var body: some View {
         NavigationView {
@@ -138,6 +166,24 @@ struct TodoListView: View {
                         }
                         .pickerStyle(SegmentedPickerStyle())
                     }
+                    
+                    // Due date selection
+                    VStack(alignment: .leading, spacing: 5) {
+                        Toggle("Set due date", isOn: $isDueDateEnabled)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                        
+                        if isDueDateEnabled {
+                            DatePicker(
+                                "Due date",
+                                selection: $selectedDueDate,
+                                in: Date()...,
+                                displayedComponents: [.date, .hourAndMinute]
+                            )
+                            .datePickerStyle(CompactDatePickerStyle())
+                            .labelsHidden()
+                        }
+                    }
                 }
                 .padding()
                 
@@ -157,32 +203,83 @@ struct TodoListView: View {
                                 .foregroundColor(item.priority.color)
                                 .imageScale(.small)
                             
-                            // Task title
-                            Text(item.title)
-                                .strikethrough(item.isCompleted)
-                                .foregroundColor(item.isCompleted ? .gray : .primary)
+                            // Task title and due date
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(item.title)
+                                    .strikethrough(item.isCompleted)
+                                    .foregroundColor(item.isCompleted ? .gray : (item.isOverdue ? .red : .primary))
+                                
+                                if let dueDate = item.dueDate {
+                                    Text(dateFormatter.string(from: dueDate))
+                                        .font(.caption2)
+                                        .foregroundColor(item.isOverdue ? .red : .gray)
+                                }
+                            }
                             
                             Spacer()
                             
-                            // Priority menu
+                            // Action menu (Priority and Due Date)
                             Menu {
-                                ForEach(Priority.allCases, id: \.self) { priority in
+                                // Priority submenu
+                                Menu {
+                                    ForEach(Priority.allCases, id: \.self) { priority in
+                                        Button(action: {
+                                            todoStore.updatePriority(for: item, to: priority)
+                                        }) {
+                                            Label(priority.rawValue, systemImage: priority.icon)
+                                        }
+                                    }
+                                } label: {
+                                    Label("Set Priority", systemImage: "flag.fill")
+                                }
+                                
+                                // Due date actions
+                                if item.dueDate == nil {
                                     Button(action: {
-                                        todoStore.updatePriority(for: item, to: priority)
+                                        let tomorrow = Date().addingTimeInterval(24 * 60 * 60)
+                                        todoStore.updateDueDate(for: item, to: tomorrow)
                                     }) {
-                                        Label(priority.rawValue, systemImage: priority.icon)
+                                        Label("Add Due Date", systemImage: "calendar.badge.plus")
+                                    }
+                                } else {
+                                    Button(action: {
+                                        todoStore.updateDueDate(for: item, to: nil)
+                                    }) {
+                                        Label("Remove Due Date", systemImage: "calendar.badge.minus")
+                                    }
+                                    
+                                    Button(action: {
+                                        let tomorrow = Date().addingTimeInterval(24 * 60 * 60)
+                                        todoStore.updateDueDate(for: item, to: tomorrow)
+                                    }) {
+                                        Label("Due Tomorrow", systemImage: "calendar")
+                                    }
+                                    
+                                    Button(action: {
+                                        let nextWeek = Date().addingTimeInterval(7 * 24 * 60 * 60)
+                                        todoStore.updateDueDate(for: item, to: nextWeek)
+                                    }) {
+                                        Label("Due Next Week", systemImage: "calendar")
                                     }
                                 }
                             } label: {
-                                Text(item.priority.rawValue)
-                                    .font(.caption)
-                                    .foregroundColor(item.priority.color)
-                                    .padding(.horizontal, 8)
-                                    .padding(.vertical, 3)
-                                    .background(
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(item.priority.color, lineWidth: 1)
-                                    )
+                                HStack(spacing: 2) {
+                                    Text(item.priority.rawValue)
+                                        .font(.caption)
+                                        .foregroundColor(item.priority.color)
+                                    
+                                    if item.dueDate != nil {
+                                        Image(systemName: "calendar")
+                                            .font(.caption)
+                                            .foregroundColor(item.isOverdue ? .red : .gray)
+                                    }
+                                }
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 3)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(item.isOverdue ? .red : item.priority.color, lineWidth: 1)
+                                )
                             }
                         }
                     }
@@ -214,9 +311,19 @@ struct TodoListView: View {
     // Function to add a new item
     private func addItem() {
         guard !newItemTitle.isEmpty else { return }
-        todoStore.addTodo(title: newItemTitle, priority: selectedPriority)
+        
+        // Add the todo with or without due date based on toggle
+        todoStore.addTodo(
+            title: newItemTitle,
+            priority: selectedPriority,
+            dueDate: isDueDateEnabled ? selectedDueDate : nil
+        )
+        
+        // Reset input fields
         newItemTitle = ""
-        selectedPriority = .medium // Reset to default priority
+        selectedPriority = .medium
+        isDueDateEnabled = false
+        selectedDueDate = Date().addingTimeInterval(24 * 60 * 60) // Reset to tomorrow
     }
 }
 

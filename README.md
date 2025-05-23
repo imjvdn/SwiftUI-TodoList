@@ -26,6 +26,7 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Batch editing capabilities
   - **Data persistence** across app launches
   - **Priority levels** (High, Medium, Low) with visual indicators
+  - **Due dates** with overdue status indicators
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
@@ -34,6 +35,8 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Animation-enhanced interactions
   - Task completion status indicator
   - Color-coded priority indicators
+  - Date picker for setting deadlines
+  - Visual overdue status alerts
 
 ## 🏛 Architecture
 
@@ -43,7 +46,10 @@ This application follows Apple's recommended architectural patterns:
 // MVVM Pattern with SwiftUI
 enum Priority: String, Codable, CaseIterable { /* Enum Model */ }
 
-struct TodoItem: Identifiable, Codable { /* Model */ }
+struct TodoItem: Identifiable, Codable {
+    /* Model with computed properties */
+    var isOverdue: Bool { /* Logic to determine if task is past due date */ }
+}
 
 class TodoStore: ObservableObject { /* ViewModel */ }
 
@@ -60,6 +66,7 @@ struct TodoListView: View { /* View */ }
 | **State Management** | `@StateObject` and `@Published` for reactive state |
 | **Data Flow** | One-way data flow with `Binding` |
 | **Data Persistence** | UserDefaults with JSON encoding/decoding |
+| **Date Handling** | `DatePicker` and `DateFormatter` for due dates |
 | **UI Components** | Composition-based view hierarchy |
 | **User Interaction** | Declarative gesture handling |
 | **Rendering** | Optimized with identity-based diffing |
@@ -107,7 +114,7 @@ open MyPlayground.playground
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| **Due Dates** | Calendar integration and date-based filtering | High |
+| **Calendar Integration** | Export tasks to system calendar | Medium |
 | **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
 | **Categories/Tags** | Group tasks by custom categories | Medium |
 | **Animations** | Custom transitions and micro-interactions | Medium |
