@@ -24,12 +24,14 @@ This Todo List application demonstrates Apple's recommended patterns and practic
   - Mark completion with smooth state transitions
   - Swipe-to-delete with haptic feedback
   - Batch editing capabilities
+  - **Data persistence** across app launches
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
   - Adaptive layout supporting all iOS devices
   - Semantic colors for accessibility
   - Animation-enhanced interactions
+  - Task completion status indicator
 
 ## 🏛 Architecture
 
@@ -37,20 +39,23 @@ This application follows Apple's recommended architectural patterns:
 
 ```swift
 // MVVM Pattern with SwiftUI
-struct TodoItem: Identifiable { /* Model */ }
+struct TodoItem: Identifiable, Codable { /* Model */ }
+
+class TodoStore: ObservableObject { /* ViewModel */ }
 
 struct TodoListView: View { /* View */ }
 
 // State Management
-@State private var todoItems: [TodoItem] = []
+@StateObject private var todoStore = TodoStore()
 ```
 
 ### Technical Implementation
 
 | Component | Implementation |
 |-----------|----------------|
-| **State Management** | `@State` for view-local state |
+| **State Management** | `@StateObject` and `@Published` for reactive state |
 | **Data Flow** | One-way data flow with `Binding` |
+| **Data Persistence** | UserDefaults with JSON encoding/decoding |
 | **UI Components** | Composition-based view hierarchy |
 | **User Interaction** | Declarative gesture handling |
 | **Rendering** | Optimized with identity-based diffing |
@@ -69,7 +74,8 @@ struct TodoListView: View { /* View */ }
   ```
 
 - **Property Wrappers**
-  - `@State` for single source of truth
+  - `@StateObject` for view model lifecycle management
+  - `@Published` for observable state
   - `$` prefix for two-way bindings
 
 - **Composition Over Inheritance**
@@ -97,7 +103,7 @@ open MyPlayground.playground
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
-| **Persistence** | CoreData integration with `@FetchRequest` | High |
+| **Advanced Persistence** | CoreData integration with `@FetchRequest` | Medium |
 | **Animations** | Custom transitions and micro-interactions | Medium |
 | **Widgets** | Home screen quick-access widgets | Medium |
 | **Shortcuts** | Siri and Shortcuts integration | Low |
