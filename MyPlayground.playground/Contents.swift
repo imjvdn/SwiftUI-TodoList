@@ -27,11 +27,19 @@ enum Priority: String, Codable, CaseIterable {
 
 // Model for a To-Do item with Codable for persistence
 struct TodoItem: Identifiable, Codable {
-    let id = UUID()
+    var id: UUID
     var title: String
-    var isCompleted: Bool = false
-    var priority: Priority = .medium
+    var isCompleted: Bool
+    var priority: Priority
     var dueDate: Date?
+    
+    init(id: UUID = UUID(), title: String, isCompleted: Bool = false, priority: Priority = .medium, dueDate: Date? = nil) {
+        self.id = id
+        self.title = title
+        self.isCompleted = isCompleted
+        self.priority = priority
+        self.dueDate = dueDate
+    }
     
     // Computed property to check if task is overdue
     var isOverdue: Bool {
