@@ -22,25 +22,19 @@ struct PersistenceController {
         // Create items with various states
         for i in 0..<titles.count {
             let newItem = Item(context: viewContext)
-            // We'll set the ID after the CoreData model is properly set up
-            // For now, we'll just use the timestamp as an identifier
             newItem.timestamp = Date()
             
-            // These properties will be available after you set up the CoreData model
-            // For now, we'll just set the timestamp to avoid errors
-            // newItem.title = titles[i]
-            // newItem.isCompleted = i % 2 == 0
-            // newItem.priority = priorities[i].rawIndex
+            // Set properties using our extension methods
+            newItem.title = titles[i]
+            newItem.isCompleted = i % 2 == 0
+            newItem.priorityEnum = priorities[i]
             
-            // Due dates will be set after CoreData model is properly configured
-            // For now, we'll comment this out to avoid errors
-            /*
+            // Set due dates for some items
             if i % 3 == 0 { // Every third item has a past due date
                 newItem.dueDate = Date().addingTimeInterval(-24 * 60 * 60) // Yesterday
             } else if i % 3 == 1 { // Some have future due dates
                 newItem.dueDate = Date().addingTimeInterval(48 * 60 * 60) // Two days from now
             }
-            */
         }
         
         do {
@@ -77,5 +71,19 @@ struct PersistenceController {
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true
+    }
+    
+    // Method to clear all tasks from the CoreData store
+    @MainActor
+    func deleteAllTasks() {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = Item.fetchRequest()
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+        
+        do {
+            try container.viewContext.execute(batchDeleteRequest)
+            try container.viewContext.save()
+        } catch {
+            print("Error deleting all tasks: \(error)")
+        }
     }
 }

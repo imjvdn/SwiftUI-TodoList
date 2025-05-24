@@ -181,9 +181,29 @@ struct TodoListView: View {
                         Image(systemName: "circle.lefthalf.filled")
                     }
                 }
+                
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: clearAllTasks) {
+                        Label("Clear All", systemImage: "trash")
+                    }
+                }
             }
         }
         .preferredColorScheme(settingsManager.colorTheme.effectiveColorScheme(systemScheme: colorScheme))
+    }
+    
+    // Function to clear all tasks
+    private func clearAllTasks() {
+        withAnimation {
+            // Use the PersistenceController to delete all tasks
+            PersistenceController.shared.deleteAllTasks()
+            
+            // Show notification
+            notificationMessage = "All tasks cleared"
+            notificationIcon = "trash"
+            notificationColor = .blue
+            showNotification = true
+        }
     }
     
     // Function to add a new item
