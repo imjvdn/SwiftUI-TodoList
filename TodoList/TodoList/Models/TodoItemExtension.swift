@@ -47,10 +47,11 @@ extension Item {
     var priorityEnum: Priority {
         get {
             let rawValue = UserDefaults.standard.integer(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.priorityKey)")
-            return Priority(rawIndex: rawValue) ?? .medium
+            // Use the fromRawIndex static method to convert Int to Priority
+            return Priority.fromRawIndex(Int16(rawValue))
         }
         set {
-            UserDefaults.standard.set(newValue.rawIndex, forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.priorityKey)")
+            UserDefaults.standard.set(Int(newValue.rawIndex), forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.priorityKey)")
         }
     }
     
