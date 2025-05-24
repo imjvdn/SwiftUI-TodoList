@@ -11,34 +11,25 @@
 
 <p align="center">A modern, declarative task management application showcasing SwiftUI's powerful architecture and Apple's Human Interface Guidelines.</p>
 
-<p align="center"><strong>This repository contains TWO implementations:</strong></p>
-<p align="center">1. A SwiftUI Playground prototype in the root directory</p>
-<p align="center">2. A full Xcode project with CoreData in the <code>TodoList/</code> directory (now fully functional!)</p>
-
 </div>
 
 ## 🌟 Overview
 
 This Todo List application demonstrates Apple's recommended patterns and practices for building performant, maintainable iOS applications using SwiftUI. The project serves as both a practical utility and a technical showcase of modern iOS development principles.
 
-### Project Structure
+### Features
 
-This repository contains two complete implementations of the same Todo List app:
-
-1. **SwiftUI Playground Prototype** (in root directory)
-   - Located in `MyPlayground.playground`
-   - Uses UserDefaults for data persistence
-   - Perfect for learning and experimentation
-   - Includes a test runner in `TestRunner.playground`
-
-2. **Full Xcode Project** (in `TodoList/` directory)
-   - Complete iOS app with proper project structure
-   - Uses CoreData for robust data persistence
-   - Includes unit tests and UI tests
-   - Ready for further development and App Store submission
-   - **NEW**: Now works with the default CoreData model without requiring manual setup
-   - **NEW**: Added "Clear All Tasks" feature for easy data management
-   - **NEW**: Added deletion notifications for improved user feedback
+- **Task Management**
+  - Add, edit, and delete tasks
+  - Mark tasks as complete
+  - Set due dates and times for tasks
+  - Recurring tasks with customizable frequencies
+  - Priority levels with visual indicators
+  - Search and filter functionality
+  - Dark/Light mode support
+  - Haptic feedback for interactions
+  - Notification support for due dates
+  - Data persistence using CoreData
 
 ## ✨ Key Features
 
