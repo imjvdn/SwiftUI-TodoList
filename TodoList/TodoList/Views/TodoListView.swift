@@ -183,9 +183,9 @@ struct TodoListView: View {
                             HStack {
                                 Toggle("Recurring", isOn: $isRecurring)
                                     .font(.subheadline)
-                                    .onChange(of: isRecurring) { _ in
+                                    .onChange(of: isRecurring) { oldValue, newValue in
                                         // Reset frequency when toggling recurrence
-                                        if isRecurring {
+                                        if newValue {
                                             recurrenceFrequency = .weekly
                                         }
                                     }
