@@ -252,10 +252,22 @@ struct TodoListView: View {
     // Delete a specific item
     private func deleteItem(_ item: Item) {
         withAnimation {
+            // Get the title before deleting
+            let title = item.title
+            
+            // Delete the item
             viewContext.delete(item)
             
             do {
                 try viewContext.save()
+                
+                // Show deletion notification
+                notificationMessage = "Deleted: \(title)"
+                notificationIcon = "trash.fill"
+                notificationColor = .red
+                withAnimation {
+                    showNotification = true
+                }
             } catch {
                 let nsError = error as NSError
                 print("Error deleting item: \(nsError), \(nsError.userInfo)")
@@ -266,10 +278,23 @@ struct TodoListView: View {
     // Delete items at specified offsets
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
+            // Get the count of items being deleted
+            let count = offsets.count
+            
+            // Delete the items
             offsets.map { items[$0] }.forEach(viewContext.delete)
             
             do {
                 try viewContext.save()
+                
+                // Show deletion notification
+                let itemText = count == 1 ? "item" : "items"
+                notificationMessage = "Deleted \(count) \(itemText)"
+                notificationIcon = "trash.fill"
+                notificationColor = .red
+                withAnimation {
+                    showNotification = true
+                }
             } catch {
                 let nsError = error as NSError
                 print("Error deleting items: \(nsError), \(nsError.userInfo)")
