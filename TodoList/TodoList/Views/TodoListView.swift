@@ -7,7 +7,6 @@
 
 import SwiftUI
 import CoreData
-import UserNotifications
 
 // Import the Formatters.swift file
 @_exported import struct Foundation.Date
@@ -183,9 +182,9 @@ struct TodoListView: View {
                             HStack {
                                 Toggle("Recurring", isOn: $isRecurring)
                                     .font(.subheadline)
-                                    .onChange(of: isRecurring) { _ in
+                                    .onChange(of: isRecurring) { oldValue, newValue in
                                         // Reset frequency when toggling recurrence
-                                        if isRecurring {
+                                        if newValue {
                                             recurrenceFrequency = .weekly
                                         }
                                     }
