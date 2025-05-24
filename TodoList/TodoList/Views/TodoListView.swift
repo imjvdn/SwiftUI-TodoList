@@ -226,17 +226,30 @@ struct TodoListView: View {
     // Function to toggle item completion
     private func toggleItemCompletion(_ item: Item) {
         withAnimation {
-            // Toggle completion and save
+            // Get the title before toggling
             let title = item.title
             
-            if !item.isCompleted {
-                // Show completion notification
-                notificationMessage = "Completed: \(title)"
-                notificationIcon = "checkmark.circle.fill"
-                notificationColor = .green
-                withAnimation {
-                    showNotification = true
+            // Toggle the completion status
+            let wasCompleted = item.isCompleted
+            item.isCompleted = !wasCompleted
+            
+            // Save the changes to CoreData
+            do {
+                try viewContext.save()
+                
+                // Only show notification when marking as completed
+                if !wasCompleted {
+                    // Show completion notification
+                    notificationMessage = "Completed: \(title)"
+                    notificationIcon = "checkmark.circle.fill"
+                    notificationColor = .green
+                    withAnimation {
+                        showNotification = true
+                    }
                 }
+            } catch {
+                let nsError = error as NSError
+                print("Error toggling completion: \(nsError), \(nsError.userInfo)")
             }
         }
     }
