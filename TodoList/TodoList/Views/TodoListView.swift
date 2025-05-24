@@ -34,8 +34,24 @@ struct TodoListView: View {
     @State private var notificationColor = Color.green
     
     var body: some View {
-        NavigationView {
-            VStack {
+        ZStack(alignment: .top) {
+            // Top notification banner that slides down like a text message
+            if showNotification {
+                NotificationBanner(message: notificationMessage, icon: notificationIcon, color: notificationColor)
+                    .animation(.spring(response: 0.5, dampingFraction: 0.7), value: showNotification)
+                    .onAppear {
+                        // Auto-dismiss after 2 seconds
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation(.easeInOut(duration: 0.5)) {
+                                showNotification = false
+                            }
+                        }
+                    }
+                    .zIndex(100) // Ensure notification appears above other content
+            }
+            
+            NavigationView {
+                VStack {
                 // Task input field
                 HStack {
                     TextField("Add a new task", text: $newItemTitle)
@@ -134,19 +150,6 @@ struct TodoListView: View {
                 }
                 .listStyle(InsetGroupedListStyle())
                 
-                // Notification banner
-                if showNotification {
-                    NotificationBanner(message: notificationMessage, icon: notificationIcon, color: notificationColor)
-                        .onAppear {
-                            // Auto-dismiss after 2 seconds
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                withAnimation(.easeInOut(duration: 0.5)) {
-                                    showNotification = false
-                                }
-                            }
-                        }
-                        .zIndex(100) // Ensure notification appears above other content
-                }
             }
             .navigationTitle("Todo List")
             .toolbar {
@@ -181,6 +184,7 @@ struct TodoListView: View {
                     }
                 }
             }
+        }
         }
         .preferredColorScheme(settingsManager.colorTheme.effectiveColorScheme(systemScheme: colorScheme))
     }

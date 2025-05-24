@@ -12,40 +12,44 @@ struct NotificationBanner: View {
     let icon: String
     let color: Color
     
-    // Animation state
-    @State private var opacity: Double = 0
-    @State private var offset: CGFloat = -20
-    
     var body: some View {
-        VStack {
-            HStack(spacing: 15) {
+        // iOS-style notification banner that slides down from the top
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
                 Image(systemName: icon)
-                    .foregroundColor(color)
-                    .font(.system(size: 24))
+                    .foregroundColor(.white)
+                    .font(.system(size: 20))
+                    .padding(8)
+                    .background(color)
+                    .clipShape(Circle())
                 
-                Text(message)
-                    .font(.subheadline)
-                    .fontWeight(.medium)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Todo List")
+                        .font(.system(size: 13, weight: .bold))
+                        .foregroundColor(.secondary)
+                    
+                    Text(message)
+                        .font(.system(size: 15))
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .lineLimit(2)
+                }
                 
                 Spacer()
             }
-            .padding()
-            .background(Color(UIColor.secondarySystemBackground))
-            .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-            .padding(.horizontal)
+            .padding(.vertical, 12)
+            .padding(.horizontal, 16)
+            .background(
+                Color(UIColor.systemBackground)
+                    .opacity(0.98)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+            .padding(.horizontal, 8)
+            .padding(.top, 4) // Small gap from the very top edge
+            
+            Spacer() // Push notification to the top
         }
-        .opacity(opacity)
-        .offset(y: offset)
-        .onAppear {
-            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
-                opacity = 1
-                offset = 0
-            }
-        }
-        .transition(.asymmetric(
-            insertion: .scale(scale: 0.9).combined(with: .opacity),
-            removal: .scale(scale: 0.95).combined(with: .opacity)
-        ))
+        .transition(.move(edge: .top))
     }
 }
