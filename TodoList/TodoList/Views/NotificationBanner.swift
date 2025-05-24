@@ -12,6 +12,10 @@ struct NotificationBanner: View {
     let icon: String
     let color: Color
     
+    // Animation state
+    @State private var opacity: Double = 0
+    @State private var offset: CGFloat = -20
+    
     var body: some View {
         VStack {
             HStack(spacing: 15) {
@@ -31,6 +35,17 @@ struct NotificationBanner: View {
             .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
             .padding(.horizontal)
         }
-        .transition(.move(edge: .top).combined(with: .opacity))
+        .opacity(opacity)
+        .offset(y: offset)
+        .onAppear {
+            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)) {
+                opacity = 1
+                offset = 0
+            }
+        }
+        .transition(.asymmetric(
+            insertion: .scale(scale: 0.9).combined(with: .opacity),
+            removal: .scale(scale: 0.95).combined(with: .opacity)
+        ))
     }
 }

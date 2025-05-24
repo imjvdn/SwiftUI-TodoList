@@ -140,11 +140,12 @@ struct TodoListView: View {
                         .onAppear {
                             // Auto-dismiss after 2 seconds
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                withAnimation {
+                                withAnimation(.easeInOut(duration: 0.5)) {
                                     showNotification = false
                                 }
                             }
                         }
+                        .zIndex(100) // Ensure notification appears above other content
                 }
             }
             .navigationTitle("Todo List")
@@ -194,7 +195,9 @@ struct TodoListView: View {
             notificationMessage = "All tasks cleared"
             notificationIcon = "trash"
             notificationColor = .blue
-            showNotification = true
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                showNotification = true
+            }
         }
     }
     
@@ -214,7 +217,7 @@ struct TodoListView: View {
             notificationMessage = "Added: \(newItemTitle)"
             notificationIcon = "plus.circle.fill"
             notificationColor = .blue
-            withAnimation {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                 showNotification = true
             }
             
@@ -243,7 +246,7 @@ struct TodoListView: View {
                     notificationMessage = "Completed: \(title)"
                     notificationIcon = "checkmark.circle.fill"
                     notificationColor = .green
-                    withAnimation {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         showNotification = true
                     }
                 }
@@ -270,7 +273,7 @@ struct TodoListView: View {
                 notificationMessage = "Deleted: \(title)"
                 notificationIcon = "trash.fill"
                 notificationColor = .red
-                withAnimation {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     showNotification = true
                 }
             } catch {
@@ -297,7 +300,7 @@ struct TodoListView: View {
                 notificationMessage = "Deleted \(count) \(itemText)"
                 notificationIcon = "trash.fill"
                 notificationColor = .red
-                withAnimation {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                     showNotification = true
                 }
             } catch {
