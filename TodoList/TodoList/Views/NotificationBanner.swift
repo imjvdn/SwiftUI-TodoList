@@ -12,6 +12,9 @@ struct NotificationBanner: View {
     let icon: String
     let color: Color
     
+    // Animation state for pulsing effect
+    @State private var isPulsing = false
+    
     var body: some View {
         // iOS-style notification banner that slides down from the top
         VStack(spacing: 0) {
@@ -23,14 +26,14 @@ struct NotificationBanner: View {
                     .background(color)
                     .clipShape(Circle())
                 
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text("Todo List")
                         .font(.system(size: 13, weight: .bold))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.primary)
+                        .opacity(0.9)
                     
                     Text(message)
-                        .font(.system(size: 15))
-                        .fontWeight(.medium)
+                        .font(.system(size: 15, weight: .semibold))
                         .foregroundColor(.primary)
                         .lineLimit(2)
                 }
@@ -39,11 +42,33 @@ struct NotificationBanner: View {
             }
             .padding(.vertical, 12)
             .padding(.horizontal, 16)
+            .scaleEffect(isPulsing ? 1.02 : 1.0)
+            .animation(Animation.easeInOut(duration: 1.5).repeatForever(autoreverses: true), value: isPulsing)
+            .onAppear {
+                isPulsing = true
+            }
             .background(
-                Color(UIColor.systemBackground)
-                    .opacity(0.98)
+                ZStack {
+                    // Vibrant background with slight gradient
+                    LinearGradient(gradient: Gradient(colors: [
+                        Color(UIColor.systemGray6),
+                        Color(UIColor.systemGray5)
+                    ]), startPoint: .top, endPoint: .bottom)
+                    
+                    // Frosted glass effect
+                    Color.white.opacity(0.3)
+                        .background(
+                            Color(UIColor.systemBackground)
+                                .opacity(0.7)
+                        )
+                        .blur(radius: 0.5)
+                }
             )
             .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(Color.primary.opacity(0.1), lineWidth: 1)
+            )
             .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
             .padding(.horizontal, 8)
             .padding(.top, 4) // Small gap from the very top edge
