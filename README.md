@@ -38,6 +38,7 @@ This repository contains two complete implementations of the same Todo List app:
    - Ready for further development and App Store submission
    - **NEW**: Now works with the default CoreData model without requiring manual setup
    - **NEW**: Added "Clear All Tasks" feature for easy data management
+   - **NEW**: Added deletion notifications for improved user feedback
 
 ## ✨ Key Features
 
@@ -51,7 +52,7 @@ This repository contains two complete implementations of the same Todo List app:
   - **Priority levels** (High, Medium, Low) with visual indicators
   - **Due dates** with overdue status indicators
   - **Dark mode support** with theme switching
-  - **Notification banners** for task completion feedback
+  - **Notification banners** for task completion, addition, and deletion feedback
 
 - **Thoughtful UI Design**
   - SF Symbols integration for visual consistency
@@ -63,7 +64,7 @@ This repository contains two complete implementations of the same Todo List app:
   - Date picker for setting deadlines
   - Visual overdue status alerts
   - Light/dark/system theme options
-  - Animated notification banners with auto-dismiss
+  - Color-coded notification banners (green for completion, red for deletion, blue for addition)
 
 ## 🏛 Architecture
 
@@ -190,6 +191,7 @@ struct TodoListView: View {
 
 ### May 23, 2025
 
+- **Delete Notifications**: Added visual feedback when tasks are deleted (single or batch deletion)
 - **Clear All Tasks Feature**: Added a button in the toolbar to easily clear all tasks with notification feedback
 - **Improved Sample Data**: Updated the preview data generation to work properly with the CoreData model
 - **Branch-Based Workflow**: Implemented a proper Git branching strategy for feature development and bug fixes
@@ -247,6 +249,4 @@ Created by Jadan Morrow
 
 ---
 
-<div align="center">
-  <p>Made with ❤️ using SwiftUI</p>
-</div>
+
