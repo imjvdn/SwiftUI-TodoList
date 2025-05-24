@@ -37,6 +37,7 @@ This repository contains two complete implementations of the same Todo List app:
    - Includes unit tests and UI tests
    - Ready for further development and App Store submission
    - **NEW**: Now works with the default CoreData model without requiring manual setup
+   - **NEW**: Added "Clear All Tasks" feature for easy data management
 
 ## ✨ Key Features
 
@@ -45,6 +46,7 @@ This repository contains two complete implementations of the same Todo List app:
   - Mark completion with smooth state transitions
   - Swipe-to-delete with haptic feedback
   - Batch editing capabilities
+  - **Clear All Tasks** feature for quick reset
   - **Data persistence** across app launches
   - **Priority levels** (High, Medium, Low) with visual indicators
   - **Due dates** with overdue status indicators
@@ -188,6 +190,9 @@ struct TodoListView: View {
 
 ### May 23, 2025
 
+- **Clear All Tasks Feature**: Added a button in the toolbar to easily clear all tasks with notification feedback
+- **Improved Sample Data**: Updated the preview data generation to work properly with the CoreData model
+- **Branch-Based Workflow**: Implemented a proper Git branching strategy for feature development and bug fixes
 - **CoreData Implementation Simplified**: The app now works with the default CoreData model without requiring manual attribute setup
 - **Adaptive UI**: Added computed properties to simulate the full model functionality while using the basic CoreData structure
 - **Fixed Build Issues**: Resolved compilation errors related to Identifiable protocol conformance
