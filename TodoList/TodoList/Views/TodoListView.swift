@@ -8,21 +8,9 @@
 import SwiftUI
 import CoreData
 
-/*
- IMPORTANT: This is a simplified version of the TodoListView that works with the default CoreData model.
- Once you've set up the CoreData model with all the required attributes, you can uncomment the full implementation.
-
- To set up the CoreData model:
- 1. Open the TodoList.xcdatamodeld file in Xcode
- 2. Select the "Item" entity and add these attributes:
-    - id: UUID (Optional)
-    - title: String
-    - isCompleted: Boolean (Use scalar type)
-    - priority: Integer 16 (Use scalar type)
-    - dueDate: Date (Optional)
-    - Keep the existing "timestamp" attribute
- 3. Save and build the project
-*/
+// Import the Formatters.swift file
+@_exported import struct Foundation.Date
+@_exported import class Foundation.DateFormatter
 
 struct TodoListView: View {
     @Environment(\.managedObjectContext) private var viewContext
@@ -35,56 +23,112 @@ struct TodoListView: View {
     
     @StateObject private var settingsManager = SettingsManager()
     
-    // These states will be used in the full implementation
-    // @State private var newItemTitle = ""
-    // @State private var selectedPriority: Priority = .medium
-    // @State private var selectedDueDate: Date = Date().addingTimeInterval(24 * 60 * 60)
-    // @State private var isDueDateEnabled = false
-    // @State private var showNotification = false
-    // @State private var notificationMessage = ""
-    // @State private var notificationIcon = ""
-    // @State private var notificationColor = Color.green
+    // States for the full implementation
+    @State private var newItemTitle = ""
+    @State private var selectedPriority: Priority = .medium
+    @State private var selectedDueDate: Date = Date().addingTimeInterval(24 * 60 * 60)
+    @State private var isDueDateEnabled = false
+    @State private var showNotification = false
+    @State private var notificationMessage = ""
+    @State private var notificationIcon = ""
+    @State private var notificationColor = Color.green
     
     var body: some View {
         NavigationView {
-            // Simplified view that works with the default CoreData model
             VStack {
-                Text("Todo List App")
-                    .font(.title)
-                    .padding()
-                
-                Text("To use the full app features:")
-                    .font(.headline)
-                    .padding(.top)
-                
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("1. Open the TodoList.xcdatamodeld file")
-                    Text("2. Add the required attributes to the Item entity")
-                    Text("3. Save and rebuild the project")
+                // Task input field
+                HStack {
+                    TextField("Add a new task", text: $newItemTitle)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    Button(action: addItem) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.blue)
+                            .font(.title2)
+                    }
+                    .disabled(newItemTitle.isEmpty)
+                    .padding(.trailing)
                 }
-                .padding()
-                .background(Color(UIColor.secondarySystemBackground))
-                .cornerRadius(10)
-                .padding()
                 
-                // Display existing items with timestamp
+                // Priority selector
+                HStack {
+                    Text("Priority:")
+                        .font(.subheadline)
+                    
+                    ForEach(Priority.allCases, id: \.self) { priority in
+                        Button(action: {
+                            selectedPriority = priority
+                        }) {
+                            HStack {
+                                Image(systemName: priority.icon)
+                                    .foregroundColor(priority.color)
+                                Text(priority.rawValue)
+                                    .font(.caption)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(
+                                selectedPriority == priority ?
+                                priority.color.opacity(0.2) : Color.clear
+                            )
+                            .cornerRadius(8)
+                        }
+                    }
+                    
+                    Spacer()
+                }
+                .padding(.horizontal)
+                
+                // Due date selector
+                HStack {
+                    Toggle("Set Due Date", isOn: $isDueDateEnabled)
+                        .font(.subheadline)
+                    
+                    if isDueDateEnabled {
+                        DatePicker("", selection: $selectedDueDate, displayedComponents: .date)
+                            .datePickerStyle(CompactDatePickerStyle())
+                            .labelsHidden()
+                    }
+                }
+                .padding(.horizontal)
+                
+                // Task list
                 List {
-                    ForEach(items) { item in
+                    ForEach(items, id: \.objectID) { item in
                         HStack {
-                            VStack(alignment: .leading) {
-                                Text("Item")
+                            // Completion checkbox
+                            Button(action: {
+                                toggleItemCompletion(item)
+                            }) {
+                                Image(systemName: item.isCompleted ? "checkmark.circle.fill" : "circle")
+                                    .foregroundColor(item.isCompleted ? .green : .gray)
+                            }
+                            
+                            // Task details
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(item.title)
                                     .font(.headline)
+                                    .strikethrough(item.isCompleted)
+                                    .foregroundColor(item.isCompleted ? .gray : .primary)
                                 
-                                if let timestamp = item.timestamp {
-                                    Text("Created: \(timestamp, formatter: itemFormatter)")
-                                        .font(.caption)
-                                        .foregroundColor(.gray)
+                                HStack {
+                                    // Priority indicator
+                                    Image(systemName: item.priorityEnum.icon)
+                                        .foregroundColor(item.priorityEnum.color)
+                                    
+                                    // Due date if available
+                                    if let dueDate = item.dueDate {
+                                        Text(dueDate, formatter: itemFormatter)
+                                            .font(.caption)
+                                            .foregroundColor(item.dueDate ?? Date() < Date() && !item.isCompleted ? .red : .gray)
+                                    }
                                 }
                             }
                             
                             Spacer()
                             
-                            // Simple delete button
+                            // Delete button
                             Button(action: {
                                 deleteItem(item)
                             }) {
@@ -96,25 +140,23 @@ struct TodoListView: View {
                     }
                     .onDelete(perform: deleteItems)
                 }
+                .listStyle(InsetGroupedListStyle())
                 
-                // Simple add button
-                Button(action: {
-                    addBasicItem()
-                }) {
-                    HStack {
-                        Image(systemName: "plus.circle.fill")
-                        Text("Add Sample Item")
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+                // Notification banner
+                if showNotification {
+                    NotificationBanner(message: notificationMessage, icon: notificationIcon, color: notificationColor)
+                        .onAppear {
+                            // Auto-dismiss after 2 seconds
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation {
+                                    showNotification = false
+                                }
+                            }
+                        }
                 }
-                .padding()
-                    
             }
-            .navigationTitle("Todo List Setup")
-            .toolbar(content: { // Explicitly specify the toolbar type
+            .navigationTitle("Todo List")
+            .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     // Theme toggle menu
                     Menu {
@@ -139,16 +181,44 @@ struct TodoListView: View {
                         Image(systemName: "circle.lefthalf.filled")
                     }
                 }
-            })
+            }
         }
-        // Apply the color scheme preference
         .preferredColorScheme(settingsManager.colorTheme.effectiveColorScheme(systemScheme: colorScheme))
     }
     
-    // Function to add a basic item with just a timestamp
-    private func addBasicItem() {
+    // Function to add a new item
+    private func addItem() {
         withAnimation {
-            _ = Item.createBasicItem(in: viewContext)
+            let newItem = Item.createBasicItem(in: viewContext)
+            
+            // Show notification
+            notificationMessage = "Added: \(newItemTitle)"
+            notificationIcon = "plus.circle.fill"
+            notificationColor = .blue
+            withAnimation {
+                showNotification = true
+            }
+            
+            // Reset input fields
+            newItemTitle = ""
+        }
+    }
+    
+    // Function to toggle item completion
+    private func toggleItemCompletion(_ item: Item) {
+        withAnimation {
+            // Toggle completion and save
+            let title = item.title
+            
+            if !item.isCompleted {
+                // Show completion notification
+                notificationMessage = "Completed: \(title)"
+                notificationIcon = "checkmark.circle.fill"
+                notificationColor = .green
+                withAnimation {
+                    showNotification = true
+                }
+            }
         }
     }
     
@@ -180,3 +250,5 @@ struct TodoListView: View {
         }
     }
 }
+
+// Import the itemFormatter from Formatters.swift

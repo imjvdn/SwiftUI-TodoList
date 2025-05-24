@@ -11,7 +11,6 @@ struct NotificationBanner: View {
     let message: String
     let icon: String
     let color: Color
-    @Binding var isShowing: Bool
     
     var body: some View {
         VStack {
@@ -25,15 +24,6 @@ struct NotificationBanner: View {
                     .fontWeight(.medium)
                 
                 Spacer()
-                
-                Button(action: {
-                    withAnimation {
-                        isShowing = false
-                    }
-                }) {
-                    Image(systemName: "xmark")
-                        .foregroundColor(.gray)
-                }
             }
             .padding()
             .background(Color(UIColor.secondarySystemBackground))
@@ -42,15 +32,5 @@ struct NotificationBanner: View {
             .padding(.horizontal)
         }
         .transition(.move(edge: .top).combined(with: .opacity))
-        .onAppear {
-            // Auto-dismiss after 3 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                withAnimation {
-                    if isShowing {
-                        isShowing = false
-                    }
-                }
-            }
-        }
     }
 }
