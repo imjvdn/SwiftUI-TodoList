@@ -127,14 +127,6 @@ struct TodoListView: View {
                             }
                             
                             Spacer()
-                            
-                            // Delete button
-                            Button(action: {
-                                deleteItem(item)
-                            }) {
-                                Image(systemName: "trash")
-                                    .foregroundColor(.red)
-                            }
                         }
                         .padding(.vertical, 4)
                     }
