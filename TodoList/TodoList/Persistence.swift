@@ -23,18 +23,36 @@ struct PersistenceController {
         for i in 0..<titles.count {
             let newItem = Item(context: viewContext)
             newItem.timestamp = Date()
-            
-            // Set properties using our extension methods
-            newItem.title = titles[i]
-            newItem.isCompleted = i % 2 == 0
-            newItem.priorityEnum = priorities[i]
-            
-            // Set due dates for some items
-            if i % 3 == 0 { // Every third item has a past due date
-                newItem.dueDate = Date().addingTimeInterval(-24 * 60 * 60) // Yesterday
-            } else if i % 3 == 1 { // Some have future due dates
-                newItem.dueDate = Date().addingTimeInterval(48 * 60 * 60) // Two days from now
+        }
+        
+        // First save the Core Data entities
+        do {
+            try viewContext.save()
+        } catch {
+            let nsError = error as NSError
+            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+        }
+        
+        // Now set our custom properties on the saved entities
+        let fetchRequest: NSFetchRequest<Item> = Item.fetchRequest()
+        do {
+            let items = try viewContext.fetch(fetchRequest)
+            for (i, item) in items.enumerated() {
+                if i < titles.count {
+                    item.title = titles[i]
+                    item.isCompleted = i % 2 == 0
+                    item.priorityEnum = priorities[i]
+                    
+                    // Set due dates for some items
+                    if i % 3 == 0 { // Every third item has a past due date
+                        item.dueDate = Date().addingTimeInterval(-24 * 60 * 60) // Yesterday
+                    } else if i % 3 == 1 { // Some have future due dates
+                        item.dueDate = Date().addingTimeInterval(48 * 60 * 60) // Two days from now
+                    }
+                }
             }
+        } catch {
+            print("Error fetching items: \(error)")
         }
         
         do {

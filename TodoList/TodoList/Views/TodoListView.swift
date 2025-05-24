@@ -211,6 +211,13 @@ struct TodoListView: View {
         withAnimation {
             let newItem = Item.createBasicItem(in: viewContext)
             
+            // Set the title and other properties
+            newItem.title = newItemTitle
+            newItem.priorityEnum = selectedPriority
+            if isDueDateEnabled {
+                newItem.dueDate = selectedDueDate
+            }
+            
             // Show notification
             notificationMessage = "Added: \(newItemTitle)"
             notificationIcon = "plus.circle.fill"

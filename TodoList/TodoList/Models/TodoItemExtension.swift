@@ -11,28 +11,60 @@ import SwiftUI
 
 // Extension to make Item work with our app
 extension Item {
-    // Computed properties to simulate the full model
+    // Stored properties for our model
+    private static let titleKey = "title_key"
+    private static let isCompletedKey = "isCompleted_key"
+    private static let priorityKey = "priority_key"
+    private static let dueDateKey = "dueDate_key"
+    
+    // Computed properties with getters and setters
     var title: String {
-        // Use the timestamp as a title if no title attribute exists
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return "Task created: " + (formatter.string(from: timestamp ?? Date()))
+        get {
+            // Try to get stored value first
+            if let storedTitle = UserDefaults.standard.string(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.titleKey)") {
+                return storedTitle
+            }
+            // Fallback to timestamp
+            let formatter = DateFormatter()
+            formatter.dateStyle = .short
+            formatter.timeStyle = .short
+            return "Task created: " + (formatter.string(from: timestamp ?? Date()))
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.titleKey)")
+        }
     }
     
     var isCompleted: Bool {
-        // Default to false since we don't have this attribute yet
-        return false
+        get {
+            return UserDefaults.standard.bool(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.isCompletedKey)")
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.isCompletedKey)")
+        }
     }
     
     var priorityEnum: Priority {
-        // Default to medium priority
-        return .medium
+        get {
+            let rawValue = UserDefaults.standard.integer(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.priorityKey)")
+            return Priority(rawIndex: rawValue) ?? .medium
+        }
+        set {
+            UserDefaults.standard.set(newValue.rawIndex, forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.priorityKey)")
+        }
     }
     
     var dueDate: Date? {
-        // Use timestamp as due date for demo purposes
-        return timestamp?.addingTimeInterval(24 * 60 * 60) // 1 day after creation
+        get {
+            return UserDefaults.standard.object(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.dueDateKey)") as? Date
+        }
+        set {
+            if let newDate = newValue {
+                UserDefaults.standard.set(newDate, forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.dueDateKey)")
+            } else {
+                UserDefaults.standard.removeObject(forKey: "\(objectID.uriRepresentation().absoluteString)_\(Item.dueDateKey)")
+            }
+        }
     }
     
     var isOverdue: Bool {
